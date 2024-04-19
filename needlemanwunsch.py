@@ -1,4 +1,4 @@
-# Implementation of the Hermann-Munsch algorithm to calculate similarity between two alphanumeric strings.
+# Implementation of the Needleman-Wunsch algorithm to calculate similarity between two alphanumeric strings.
 # Questions? Contact me @carthussandworm on Discord.
 import numpy as np
 import re
@@ -44,7 +44,7 @@ difference = np.array([[0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 8, 5, 7, 7, 7, 6, 5, 4, 2,
 
 # The function takes three parameters: a string representing the input, a list of known strings that the first one could represent,
 # and a cost representing how severe the gap penalty should be.
-def hermannMunsch(inputStr, comparedStrs, gapCost):
+def needlemanWunsch(inputStr, comparedStrs, gapCost):
 
     # Removes all non-alphanumeric characters from the string, and sets all alphabetic characters to lowercase.
     pattern = re.compile('\W')
@@ -122,4 +122,4 @@ def hermannMunsch(inputStr, comparedStrs, gapCost):
     return comparedStrs[m]
 
 # A simple example using protein chains. The difference array is designed with a gap penalty of 10 in mind.
-print(hermannMunsch('Dober', ['Dover', 'Newark', 'Wilmington'], 10))
+print(needlemanWunsch('Dober', ['Dover', 'Newark', 'Wilmington'], 10))
