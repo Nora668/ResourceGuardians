@@ -1,24 +1,22 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html, Input, Output, State
-import PyPDF2
+import pandas as pd
 import base64
 import io
-import os
-import uuid
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("PDF Text Extractor"), className="text-center my-4")
+        dbc.Col(html.H1("CSV Sorter"), className="text-center my-4")
     ]),
     dbc.Row([
         dbc.Col(dcc.Upload(
-            id='upload-pdf',
+            id='upload-csv',
             children=html.Div([
                 'Drag and Drop or ',
-                html.A('Select a PDF File')
+                html.A('Select a CSV File')
             ]),
             style={
                 'width': '100%',
@@ -38,27 +36,45 @@ app.layout = dbc.Container([
     ])
 ])
 
-def extract_text_from_pdf(file_content):
-    text = ""
-    pdf_file = io.BytesIO(file_content)
-    reader = PyPDF2.PdfReader(pdf_file)
-    num_pages = len(reader.pages)
-    for page_num in range(num_pages):
-        page = reader.pages[page_num]
-        text += page.extract_text()
-    return text
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+            return df
+    except Exception as e:
+        return html.Div([
+            'There was an error processing this file.'
+        ])
 
 @app.callback(
     Output('output-text', 'children'),
-    Input('upload-pdf', 'contents'),
-    State('upload-pdf', 'filename')
+    Input('upload-csv', 'contents'),
+    State('upload-csv', 'filename')
 )
-def update_output(file_contents, filename):
-    if file_contents is not None:
-        content_type, content_string = file_contents.split(',')
-        decoded = base64.b64decode(content_string)
-        text = extract_text_from_pdf(decoded)
-        return html.Pre(text)
+def update_output(contents, filename):
+    if contents is not None:
+        df = parse_contents(contents, filename)
+        if isinstance(df, pd.DataFrame):
+            df['month'] = pd.to_datetime(df['month'], format='%B')
+            sorted_by_location = df.sort_values(by=['location']).reset_index(drop=True)
+            sorted_by_month = df.sort_values(by=['month']).reset_index(drop=True)
+            sorted_by_water = df.sort_values(by=['water']).reset_index(drop=True)
+            sorted_by_energy = df.sort_values(by=['energy']).reset_index(drop=True)
+
+            return html.Div([
+                html.H5("Sorted by Location:"),
+                html.Pre(sorted_by_location.to_string(index=False)),
+                html.H5("Sorted by Month:"),
+                html.Pre(sorted_by_month.to_string(index=False)),
+                html.H5("Sorted by Water:"),
+                html.Pre(sorted_by_water.to_string(index=False)),
+                html.H5("Sorted by Energy:"),
+                html.Pre(sorted_by_energy.to_string(index=False)),
+            ])
+        else:
+            return df
     return "No file uploaded yet."
 
 if __name__ == "__main__":
