@@ -40,40 +40,15 @@ app.layout = dbc.Container([
             dcc.Graph(id='energy-graph')
         ], width=12),  # Use full width for the energy usage graph
     ]),
-
-    # New Row for additional radio buttons to select data type for comparison graph
-    dbc.Row([
-        dbc.Col([
-            dbc.RadioItems(
-                options=[
-                    {"label": "Water", "value": "water"},
-                    {"label": "Energy", "value": "energy"}
-                ],
-                value='water',  # Default to 'water'
-                id='data-type-selector',
-                inline=True,
-                className="mt-3"
-            )
-        ], width={"size": 6, "offset": 3})  # Center the radio buttons
-    ]),
-
-    # New Row for the comparison graph
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='comparison-graph')
-        ], width=12),  # Use full width for the comparison graph
-    ]),
 ], fluid=True)
 
 # Add controls to build the interaction
 @callback(
     [Output('water-graph', 'figure'),
-     Output('energy-graph', 'figure'),
-     Output('comparison-graph', 'figure')],
-    [Input('location-selector', 'value'),
-     Input('data-type-selector', 'value')]
+     Output('energy-graph', 'figure')],
+    [Input('location-selector', 'value')]
 )
-def update_graphs(selected_location, data_type):
+def update_graphs(selected_location):
     filtered_df = df[df['location'] == selected_location]
     # Water usage bar graph
     water_fig = px.bar(filtered_df, x='month', y='water', title=f"Water Usage in {selected_location}",
@@ -88,12 +63,7 @@ def update_graphs(selected_location, data_type):
                          markers=True)
     energy_fig.update_layout(xaxis_title="Month", yaxis_title="Energy (Units)")
 
-    # Multiple bar graph for all locations
-    comparison_fig = px.bar(df, x='month', y=data_type, color='location', barmode='group',
-                            title=f'{data_type.capitalize()} Usage Comparison Across Locations')
-    comparison_fig.update_layout(xaxis_title="Month", yaxis_title=f"{data_type.capitalize()} (Units)")
-
-    return water_fig, energy_fig, comparison_fig
+    return water_fig, energy_fig
 
 # Run the app
 if __name__ == '__main__':
