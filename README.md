@@ -16,7 +16,9 @@ Next Steps:
 Current website does not work with client data, graph is currently using sample data. Sorting algorithm does not return csv to be used with dash. Need to connect the 2 dots first. 
 
 1. Make sure sorting algorithm returns a sorted csv file at the end to input into dash.
-2. Making website more public and accessible.
-3. Creating more unique graphs to fit client need.
-4. Obtain more data(dash works well with csv files and client can provide either csv or pdf, recommend csv)
+2. Check over code, change local link to udel links to work for public.
+3. CLient wants a step by step how to once everything is working.
+4. Making website more public and accessible.
+5. Creating more unique graphs to fit client need.
+6. Obtain more data(dash works well with csv files and client can provide either csv or pdf, recommend csv)
 
